@@ -1,14 +1,41 @@
-import React from "react";
+import * as Location from "expo-location";
+import React, { useEffect, useState } from "react";
 import { View, Text, Dimensions, StyleSheet, ScrollView } from "react-native";
-
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
 export default function App() {
-  console.log(SCREEN_WIDTH)
+  const [city, setCity] = useState("Loading...");
+  const [location, setLocation] = useState();
+  const [ok, setOk] = useState(true);
+
+  const ask = async () => {
+    const { granted } = await Location.requestForegroundPermissionsAsync();
+    console.log(granted)
+    if (!granted) {
+      setOk(false);
+    }
+
+    const {
+      coords: { latitude, longitude },
+    } = await Location.getCurrentPositionAsync({ accuracy: 6 });
+    console.log(latitude, longitude)
+
+    const location = await Location.reverseGeocodeAsync(
+      { latitude, longitude },
+      { useGoogleMaps: false }
+    );
+    setCity(location[0].city);
+    console.log(location)
+  };
+
+  useEffect(() => {
+    ask();
+  }, []);
+
   return (
     <View style={styles.container}>
       <View style={styles.city}>
-        <Text style={styles.cityName}>Seoul</Text>
+        <Text style={styles.cityName}>{city}</Text>
       </View>
       <ScrollView
         pagingEnabled
@@ -21,15 +48,15 @@ export default function App() {
           <Text style={styles.description}>Sunny</Text>
         </View>
         <View style={styles.day}>
-          <Text style={styles.temp}>28</Text>
+          <Text style={styles.temp}>27</Text>
           <Text style={styles.description}>Sunny</Text>
         </View>
         <View style={styles.day}>
-          <Text style={styles.temp}>29</Text>
+          <Text style={styles.temp}>27</Text>
           <Text style={styles.description}>Sunny</Text>
         </View>
         <View style={styles.day}>
-          <Text style={styles.temp}>23</Text>
+          <Text style={styles.temp}>27</Text>
           <Text style={styles.description}>Sunny</Text>
         </View>
       </ScrollView>
@@ -66,4 +93,3 @@ const styles = StyleSheet.create({
     fontSize: 60,
   },
 });
-
